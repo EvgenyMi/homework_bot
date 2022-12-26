@@ -1,15 +1,14 @@
 import logging
 import os
+import time
+from http import HTTPStatus
 
 import requests
-import time
 import telegram
-
-
-from http import HTTPStatus
-from exceptions import NotOkStatusException, NotNewWorksException, UnavailableException
-
 from dotenv import load_dotenv
+
+from exceptions import (NotNewWorksException, NotOkStatusException,
+                        UnavailableException)
 
 load_dotenv()
 
