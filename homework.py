@@ -33,7 +33,7 @@ HOMEWORK_VERDICTS = {
 
 
 def check_tokens():
-    """Проверяем наличие токенов"""
+    """Проверяем наличие токенов."""
     tokens = {
         'pract_token': PRACTICUM_TOKEN,
         'telegr_token': TELEGRAM_TOKEN,
@@ -46,7 +46,7 @@ def check_tokens():
 
 
 def send_message(bot, message):
-    """Отправка сообщения в чат"""
+    """Отправка сообщения в чат."""
     try:
         logging.debug('Успешная отправка сообщения в Telegram')
         bot.send_message(TELEGRAM_CHAT_ID, message)
@@ -55,7 +55,7 @@ def send_message(bot, message):
 
 
 def get_api_answer(timestamp):
-    """Получение ответа от API Яндекс Практикума"""
+    """Получение ответа от API Яндекс Практикума."""
     params = {'from_date': timestamp}
     try:
         response = requests.get(
@@ -79,7 +79,7 @@ def get_api_answer(timestamp):
 
 
 def check_response(response):
-    """Проверка ответа"""
+    """Проверка ответа."""
     if not isinstance(response, dict):
         logging.error('API передал не словарь')
         raise TypeError('API передал не словарь')
@@ -94,7 +94,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """Получаем информацию о судьбе домашней работы"""
+    """Получаем информацию о судьбе домашней работы."""
     homework_name = homework.get('homework_name')
     if homework_name is None:
         logging.error('В ответе нет ключа homework_name')

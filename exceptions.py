@@ -5,18 +5,18 @@ class NotOkStatusException:
 
 
 class NotNewWorksException:
-    """Нет новых работ на проверку"""
+    """Нет новых работ на проверку."""
 
     pass
 
 
 class RequestException:
-    """Проблемы с доступом к url"""
+    """Проблемы с доступом к url."""
 
     pass
 
 
 class UnavailableException:
-    """URL недоступен"""
+    """URL недоступен."""
 
     pass
