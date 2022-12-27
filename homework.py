@@ -7,6 +7,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+from endpoints import ENDPOINT
 from exceptions import (NotNewWorksException, NotOkStatusException,
                         UnavailableException)
 
@@ -14,14 +15,9 @@ load_dotenv()
 
 PRACTICUM_TOKEN = os.getenv('PR_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TEL_TOKEN')
-TELEGRAM_CHAT_ID = 368492325
-
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO)
+TELEGRAM_CHAT_ID = os.getenv('TEL_CHAT_ID')
 
 RETRY_PERIOD = 600
-ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
 
@@ -34,15 +30,14 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens():
     """Проверяем наличие токенов."""
-    tokens = {
-        'pract_token': PRACTICUM_TOKEN,
-        'telegr_token': TELEGRAM_TOKEN,
-    }
-    for key, value in tokens.items():
-        if value is None:
-            logging.critical(f'Нету токена {key}')
-            return False
-    return True
+    if all([
+        PRACTICUM_TOKEN is not None,
+        TELEGRAM_TOKEN is not None,
+        TELEGRAM_CHAT_ID is not None,
+    ]) == True:
+        return True
+    logging.critical('Не хватает токенов')
+    return False
 
 
 def send_message(bot, message):
@@ -116,32 +111,36 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-    if check_tokens():
-
-        bot = telegram.Bot(token=TELEGRAM_TOKEN)
-        timestamp = int(time.time())
-        cache = []
-        while True:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO)
+    if not check_tokens():
+        logging.critical('Не хватает токенов')
+        exit()
+    bot = telegram.Bot(token=TELEGRAM_TOKEN)
+    timestamp = int(time.time())
+    cache = []
+    while True:
+        try:
+            response = get_api_answer(timestamp)
+            homeworks = check_response(response)
             try:
-                response = get_api_answer(timestamp)
-                homeworks = check_response(response)
-                try:
-                    (homeworks[0])
-                except IndexError:
-                    logging.critical('Нет новых работ на проверку')
-                    raise NotNewWorksException('Нет новых работ на проверку')
-                message = parse_status(homeworks[0])
-                timestamp = response.get('current_date')
-            except Exception as error:
-                message = f'Сбой в работе программы: {error}'
-                logging.error(message)
-            finally:
-                if message in cache:
-                    logging.debug('Новых статусов нет')
-                else:
-                    cache.append(message)
-                    send_message(bot, message)
-                time.sleep(RETRY_PERIOD)
+                (homeworks[0])
+            except IndexError:
+                logging.critical('Нет новых работ на проверку')
+                raise NotNewWorksException('Нет новых работ на проверку')
+            message = parse_status(homeworks[0])
+            timestamp = response.get('current_date')
+        except Exception as error:
+            message = f'Сбой в работе программы: {error}'
+            logging.error(message)
+        finally:
+            if message in cache:
+                logging.debug('Новых статусов нет')
+            else:
+                cache.append(message)
+                send_message(bot, message)
+            time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
