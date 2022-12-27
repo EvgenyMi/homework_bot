@@ -34,7 +34,7 @@ def check_tokens():
         PRACTICUM_TOKEN is not None,
         TELEGRAM_TOKEN is not None,
         TELEGRAM_CHAT_ID is not None,
-    ]) == True:
+    ]) is True:
         return True
     logging.critical('Не хватает токенов')
     return False
