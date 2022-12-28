@@ -20,3 +20,9 @@ class UnavailableException:
     """URL недоступен."""
 
     pass
+
+
+class SendMessageException:
+    """Не удаётся отправить сообщение"""
+
+    pass

@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 from endpoints import ENDPOINT
 from exceptions import (NotNewWorksException, NotOkStatusException,
-                        UnavailableException)
+                        SendMessageException, UnavailableException)
 
 load_dotenv()
 
@@ -30,14 +30,13 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens():
     """Проверяем наличие токенов."""
-    if all([
+    if not all([
         PRACTICUM_TOKEN is not None,
         TELEGRAM_TOKEN is not None,
         TELEGRAM_CHAT_ID is not None,
-    ]) is True:
-        return True
-    logging.critical('Не хватает токенов')
-    return False
+    ]):
+        logging.critical('Не хватает токенов')
+    return True
 
 
 def send_message(bot, message):
@@ -45,8 +44,10 @@ def send_message(bot, message):
     try:
         logging.debug('Успешная отправка сообщения в Telegram')
         bot.send_message(TELEGRAM_CHAT_ID, message)
-    except Exception as error:
-        logging.error(f'Не удаётся отправить сообщение: {error}')
+    except telegram.TelegramError:
+        logging.error(f'Не удаётся отправить сообщение: {message}')
+        raise SendMessageException(
+            f'Не удаётся отправить сообщение: {message}')
 
 
 def get_api_answer(timestamp):
