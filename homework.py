@@ -36,6 +36,7 @@ def check_tokens():
         TELEGRAM_CHAT_ID is not None,
     ]):
         logging.critical('Не хватает токенов')
+        return False
     return True
 
 
